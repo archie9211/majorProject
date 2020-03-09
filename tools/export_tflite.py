@@ -24,6 +24,8 @@ flags.DEFINE_integer('num_classes', 80, 'number of classes in the model')
 flags.DEFINE_integer('size', 416, 'image size')
 
 # TODO: This is broken DOES NOT WORK !!
+
+
 def main(_argv):
     if FLAGS.tiny:
         yolo = YoloV3Tiny(size=FLAGS.size, classes=FLAGS.num_classes)
@@ -60,6 +62,7 @@ def main(_argv):
     output_data = interpreter.get_tensor(output_details[0]['index'])
 
     print(output_data)
+
 
 if __name__ == '__main__':
     app.run(main)
