@@ -1,9 +1,11 @@
 import numpy as np
 import cv2
 import joblib
+import pandas as pd
 
 
 def my_draw_flow(img, flow, step, boxes, nums, mode):
+    data = pd.DataFrame()
     if(mode == 3):
         model = joblib.load("finalized_model.sav")
         scaler = joblib.load("scaler.sav")
@@ -23,7 +25,9 @@ def my_draw_flow(img, flow, step, boxes, nums, mode):
             fx = abs(x1y1[0]-x2y2[0])*np.mean(fx)/4
             fy = abs(x1y1[1]-x2y2[1])*np.mean(fy)/4
             x = (x1y1[0]+x2y2[0])/2
-            y = (x1y1[1]+x2y2[1])/2
+            y = (x1y1[1] + x2y2[1]) / 2
+            temp = [fx, fy, x, y, 0]  # left = 0
+            data = data.append([temp])
             if(mode == 3):
                 X.append([fx, fy, x, y])
             cv2.arrowedLine(vis, (int(x), int(y)), (int(x+fx),
@@ -33,9 +37,9 @@ def my_draw_flow(img, flow, step, boxes, nums, mode):
         if(len(X) != 0):
             X = scaler.transform(X)
             result = model.predict(X)
-        return vis, result  # result ; 0 = unsafe; 1 = safe
+        return vis, result, data  # result ; 0 = unsafe; 1 = safe
     else:
-        return vis
+        return vis, data
 
 
 def opticalFlow(image1, image2):

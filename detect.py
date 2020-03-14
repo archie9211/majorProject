@@ -51,6 +51,7 @@ def main(_argv):
 
     t1 = time.time()
     boxes, scores, classes, nums = yolo(img)
+    print(classes)
     t2 = time.time()
     logging.info('time: {}'.format(t2 - t1))
 
@@ -61,7 +62,7 @@ def main(_argv):
                                            np.array(boxes[0][i])))
 
     img = cv2.cvtColor(img_raw.numpy(), cv2.COLOR_RGB2BGR)
-    img = draw_outputs(img, (boxes, scores, classes, nums), class_names)
+    img = draw_outputs(img, (boxes, scores, classes, nums), class_names, [])
     cv2.imwrite(FLAGS.output, img)
     logging.info('output saved to: {}'.format(FLAGS.output))
 

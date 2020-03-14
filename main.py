@@ -3,6 +3,7 @@ from absl import app, flags, logging
 from absl.flags import FLAGS
 import cv2
 import tensorflow as tf
+import pandas as pd
 from optical_flow import *
 from yolov3_tf2.models import (
     YoloV3, YoloV3Tiny
@@ -63,7 +64,9 @@ def main(_argv):
         codec = cv2.VideoWriter_fourcc(*FLAGS.output_format)
         out = cv2.VideoWriter(FLAGS.output, codec, fps, (width, height))
     countFrame = 0
+    temp = pd.DataFrame()
     while True:
+
         _, img = vid.read()
         countFrame += 1
 
@@ -82,6 +85,7 @@ def main(_argv):
         times.append(t2-t1)
         times = times[-20:]
         result = []
+        data = []
         if(FLAGS.mode != 'basic'):
             if(FLAGS.mode == 'optical_flow'):
                 mode = 1
@@ -93,24 +97,28 @@ def main(_argv):
             if(countFrame >= 2):
                 flow = opticalFlow(img1, img2)
                 if(FLAGS.mode == 'final'):
-                    img, result = my_draw_flow(
+                    img, result, data = my_draw_flow(
                         img2, flow, 1, boxes[0], nums[0], mode)
                     print(result)
                 else:
-                    img = my_draw_flow(img1, flow, 4, boxes[0], nums[0], mode)
+                    img, data = my_draw_flow(
+                        img1, flow, 4, boxes[0], nums[0], mode)
             img2 = img1
-
-        img = draw_outputs(
-            img, (boxes, scores, classes, nums), class_names, result)
-        img = cv2.putText(img, "Time: {:.2f}ms".format(sum(times)/len(times)*1000), (0, 30),
-                          cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 255), 2)
+        temp = temp.append(data)
+        # img = draw_outputs(
+        #     img, (boxes, scores, classes, nums), class_names, result)
+        # img = cv2.putText(img, "Time: {:.2f}ms".format(sum(times)/len(times)*1000), (0, 30),
+        #                   cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 255), 2)
         if FLAGS.output:
             out.write(img)
+        if (countFrame == 10):
+            break
         # cv2.imshow('output', img)
         if cv2.waitKey(1) == ord('q'):
             break
 
     cv2.destroyAllWindows()
+    temp.to_csv("left.csv", index=False, header=False)
 
 
 if __name__ == '__main__':
