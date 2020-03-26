@@ -69,11 +69,13 @@ def main(_argv):
 
         _, img = vid.read()
         countFrame += 1
-
+        print(countFrame)
+        # if(countFrame % 5 != 0):
+        #     continue
         if img is None:
             logging.warning("Empty Frame")
             time.sleep(0.1)
-            continue
+            break
 
         img_in = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         img_in = tf.expand_dims(img_in, 0)
@@ -85,7 +87,7 @@ def main(_argv):
         times.append(t2-t1)
         times = times[-20:]
         result = []
-        data = []
+        data = [[]]
         if(FLAGS.mode != 'basic'):
             if(FLAGS.mode == 'optical_flow'):
                 mode = 1
@@ -105,20 +107,21 @@ def main(_argv):
                         img1, flow, 4, boxes[0], nums[0], mode)
             img2 = img1
         temp = temp.append(data)
+
         # img = draw_outputs(
         #     img, (boxes, scores, classes, nums), class_names, result)
         # img = cv2.putText(img, "Time: {:.2f}ms".format(sum(times)/len(times)*1000), (0, 30),
         #                   cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 255), 2)
         if FLAGS.output:
             out.write(img)
-        if (countFrame == 10):
-            break
-        # cv2.imshow('output', img)
-        if cv2.waitKey(1) == ord('q'):
-            break
+        # if (countFrame == 10):
+        #     break
+        # # cv2.imshow('output', img)
+        # if cv2.waitKey(1) == ord('q'):
+        #     break
 
-    cv2.destroyAllWindows()
-    temp.to_csv("left.csv", index=False, header=False)
+    # cv2.destroyAllWindows()
+    temp.to_csv("leftvid3.csv", index=False, header=False)
 
 
 if __name__ == '__main__':
